@@ -8,9 +8,10 @@ def get_center_y(video_path):
 
     cap = cv2.VideoCapture(video_path)
 
+    # Get the total number of frames for the video
+    total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
+
     center_y_list = []
-    fps = 10  # frames per second
-    total_frames = 5 * 60 * fps  # frames for 5 minutes
 
     with mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5) as pose:
         for i in tqdm(range(total_frames), desc="Processing frames", ncols=100):
@@ -23,12 +24,13 @@ def get_center_y(video_path):
 
             if results.pose_landmarks:
                 # Calculate the center y-coordinate
-                left_shoulder = results.pose_landmarks.landmark[mp_pose.PoseLandmark.LEFT_SHOULDER].y
-                right_shoulder = results.pose_landmarks.landmark[mp_pose.PoseLandmark.RIGHT_SHOULDER].y
+                left_shoulder = results.pose_landmarks.landmark[11].y
+                right_shoulder = results.pose_landmarks.landmark[12].y
 
                 center_y = (left_shoulder + right_shoulder) / 2
                 center_y_list.append(center_y)
+            else:
+                center_y_list.append(None)  # Add None if no landmarks are detected
 
     cap.release()
     return center_y_list
-
